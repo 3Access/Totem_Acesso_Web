@@ -1,133 +1,135 @@
 <ion-header>
-  <ion-navbar no-border-bottom color="white_">  
-    <ion-row>   
-      <ion-col><img width="300px" height="100px" src="assets/imgs/logo.png"/> </ion-col>            
-      <ion-col> <h1 text-right class="header-conter">  {{counter}} </h1></ion-col>      
-    </ion-row>    
-  </ion-navbar>  
-</ion-header>
-
-<ion-content>
-
-    <ion-list *ngIf="isLoading">
-        <ion-spinner name="bubbles"></ion-spinner>
-    </ion-list>
-
-    <ion-list>    
-    
-    <ion-item no-lines><ion-label fixed> {{titleTicketOne}} </ion-label>
-        <ion-input type="number" (keyup.enter)="setFilteredItems()" [(ngModel)]="searchTicket" #searchbar></ion-input>
-    </ion-item>                                    
-
-    <ion-grid>
-        <ion-row>
-            
-            <ion-col *ngIf="idTypeBackgrond == dataInfo.backgroundIdNone">
-                <h3 text-right class="title">{{title}}</h3>                                
-            </ion-col>
-
-            <ion-col class="box-header-gray" *ngIf="idTypeBackgrond !== dataInfo.backgroundIdNone">                
-                <h3 text-right class="titleHistory" *ngIf="idTypeBackgrond !== dataInfo.backgroundIdSearch">{{history}}</h3>                       
-                <h3 text-right class="titleHistory" *ngIf="idTypeBackgrond >= dataInfo.backgroundIdSearch && !ticketRead">  {{dataInfo.historyGeneral}} </h3>
-             </ion-col>
-
-        </ion-row>  
-
-        <ion-row>
-            <div class="box-message" *ngIf="idTypeBackgrond == dataInfo.backgroundIdGreen">
-                <h1 text-right class="ticket-type-font">{{message1}}</h1>     
-                <h2 text-right class="ticket-type-msg">{{message2}}</h2>     
-            </div>
-
-            <div class="box-message-red" *ngIf="idTypeBackgrond == dataInfo.backgroundIdRed">
-                <h1 text-right class="ticket-type-font"> {{message1}} </h1>     
-                <h2 text-right class="ticket-type-msg"> {{message2}} </h2>     
-            </div>
-
-            <div class="box-message-green" *ngIf="idTypeBackgrond == dataInfo.backgroundIdSearchOk">                                       
-                <h4 text-right class="ticket-type-font"> {{historyText1}} </h4>     
-                <h4 text-right class="ticket-type-msg"> {{dataInfo.historyUntilDay}}: {{historyText2}}</h4>                                                     
-                <h3 text-right class="ticket-type-msg"> {{dataInfo.accessPoints}}:</h3>
-                <h4 text-right class="ticket-type-submsg"> {{historyText3}}</h4>
-            </div>
-
-            <div class="box-message-red" *ngIf="idTypeBackgrond == dataInfo.backgroundIdSearchNotOk">
-                <h4 text-right class="ticket-type-font"> {{historyText1}} </h4>     
-                <h4 text-right class="ticket-type-msg"> {{historyText2}}</h4>     
-               
-            </div>
+    <ion-toolbar color="primary">
+      <ion-grid>
+        <ion-row class="ion-align-items-center">
+          <ion-col size="6">
+            <img src="assets/imgs/logo.png" alt="Logo" style="max-width: 200px; height: auto;" />
+          </ion-col>
+          <ion-col size="6">
+            <h1 class="header-counter">{{counter}}</h1>
+          </ion-col>
         </ion-row>
-    </ion-grid>
-
- </ion-list>
-
-</ion-content>
+      </ion-grid>
+    </ion-toolbar>
+  </ion-header>
   
-<ion-footer>
-    <ion-toolbar color="white_">  
-
-      <ion-grid>                  
+  <ion-content class="ion-padding">
+    <ion-list *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </ion-list>
+  
+    <ion-list>
+      <ion-item lines="none" class="search-item">
+        <ion-label>{{titleTicketOne}}</ion-label>
+        <ion-input
+          type="number"
+          [(ngModel)]="searchTicket"
+          (keyup.enter)="setFilteredItems()"
+          placeholder="Digite o número do ticket"
+          clearInput
+        ></ion-input>
+      </ion-item>
+  
+      <ion-grid>
         <ion-row>
-            
-        <ion-col col-4>  
-
-            <div class="options">
-              
-                <ion-col>  
-                    <ion-fab>
-                        <button ion-fab color="light" icon-only (click)="showHistory()" [disabled]="!inputVisible" tooltip="Procurar" positionV="top" arrow>
-                            <ion-icon name='search' color="dark"></ion-icon>
-                        </button>
-                    </ion-fab>  
-                </ion-col> 
-
-                <ion-col>  
-                    <ion-fab>
-                        <button ion-fab color="light" icon-only (click)="setMultiple()"  [disabled]="!inputVisible" tooltip="Multiplo" positionV="top" arrow>
-                            <ion-icon name='flash' color="{{multipleColor}}"></ion-icon>
-                        </button>
-                    </ion-fab>  
-                </ion-col>
-        
-                <ion-col>  
-                    
-                    <ion-fab>
-                        <button ion-fab color="light" icon-only (click)="decrementCounter()" [disabled]="!inputVisible" tooltip="Decrementar ou incrementar" positionV="top" arrow>
-                            <ion-icon *ngIf="decrementingCounter" name='remove-circle' color="secondary" class="ion-spin-animation"></ion-icon>                            
-                            <ion-icon *ngIf="! decrementingCounter" name='remove-circle' color="danger"></ion-icon>
-                        </button>
-                    </ion-fab>  
-                </ion-col>  
-
-                <ion-col>  
-                    <ion-fab>
-                        <button ion-fab color="light" icon-only (click)="openGateIn()" *ngIf="dataInfo.receptorOneEnabled === 1" tooltip="Abrir receptor" positionV="top" arrow>
-                            <ion-icon name='arrow-up' color="secondary"></ion-icon>
-                        </button>
-                    </ion-fab>  
-                </ion-col> 
-
-                <ion-col>  
-                    <ion-fab>
-
-                        <button ion-fab color="light" icon-only (click)="openGateOut()" *ngIf="dataInfo.receptorTwoEnabled === 1" tooltip="Abrir receptor saída" positionV="top" arrow>
-                            <ion-icon name='arrow-down' color="primary"></ion-icon>
-                        </button>
-                    </ion-fab>  
-                </ion-col> 
-
+          <ion-col *ngIf="idTypeBackgrond === dataInfo.backgroundIdNone">
+            <h3 class="title">{{title}}</h3>
+          </ion-col>
+  
+          <ion-col
+            class="header-message"
+            [ngClass]="{
+              'header-gray': idTypeBackgrond !== dataInfo.backgroundIdNone,
+              'header-green': idTypeBackgrond === dataInfo.backgroundIdGreen,
+              'header-red': idTypeBackgrond === dataInfo.backgroundIdRed
+            }"
+            *ngIf="idTypeBackgrond !== dataInfo.backgroundIdNone"
+          >
+            <h3 class="title-history" *ngIf="idTypeBackgrond !== dataInfo.backgroundIdSearch">
+              {{history}}
+            </h3>
+            <h3 class="title-history" *ngIf="idTypeBackgrond >= dataInfo.backgroundIdSearch && !ticketRead">
+              {{dataInfo.historyGeneral}}
+            </h3>
+          </ion-col>
+        </ion-row>
+  
+        <ion-row>
+          <ion-col>
+            <div
+              class="message-box"
+              [ngClass]="{
+                'message-green': idTypeBackgrond === dataInfo.backgroundIdGreen || idTypeBackgrond === dataInfo.backgroundIdSearchOk,
+                'message-red': idTypeBackgrond === dataInfo.backgroundIdRed || idTypeBackgrond === dataInfo.backgroundIdSearchNotOk
+              }"
+              *ngIf="idTypeBackgrond !== dataInfo.backgroundIdNone"
+            >
+              <h2 class="ticket-type-font" *ngIf="idTypeBackgrond === dataInfo.backgroundIdGreen || idTypeBackgrond === dataInfo.backgroundIdRed">
+                {{message1}}
+              </h2>
+              <h3 class="ticket-type-msg" *ngIf="idTypeBackgrond === dataInfo.backgroundIdGreen || idTypeBackgrond === dataInfo.backgroundIdRed">
+                {{message2}}
+              </h3>
+  
+              <ng-container *ngIf="idTypeBackgrond === dataInfo.backgroundIdSearchOk">
+                <h4 class="ticket-type-font">{{historyText1}}</h4>
+                <h4 class="ticket-type-msg">{{dataInfo.historyUntilDay}}: {{historyText2}}</h4>
+                <h3 class="ticket-type-msg">{{dataInfo.accessPoints}}:</h3>
+                <h4 class="ticket-type-submsg">{{historyText3}}</h4>
+              </ng-container>
+  
+              <ng-container *ngIf="idTypeBackgrond === dataInfo.backgroundIdSearchNotOk">
+                <h4 class="ticket-type-font">{{historyText1}}</h4>
+                <h4 class="ticket-type-msg">{{historyText2}}</h4>
+              </ng-container>
             </div>
-
-            </ion-col>           
-
-            <ion-col col-8>                                                                     
-                <div class="logo-bottom">
-                    <img src="assets/imgs/logo3a.png"/>
-                </div>
-            </ion-col>
-
-        </ion-row>          
-        </ion-grid>   
-                                                                                      
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-list>
+  </ion-content>
+  
+  <ion-footer>
+    <ion-toolbar color="primary">
+      <ion-grid>
+        <ion-row class="ion-align-items-center">
+          <ion-col size="6">
+            <div class="options">
+              <ion-fab>
+                <button ion-fab mini color="light" (click)="showHistory()" [disabled]="!inputVisible">
+                  <ion-icon name="search" color="dark"></ion-icon>
+                </button>
+              </ion-fab>
+              <ion-fab>
+                <button ion-fab mini color="light" (click)="setMultiple()" [disabled]="!inputVisible">
+                  <ion-icon name="flash" [color]="multipleColor"></ion-icon>
+                </button>
+              </ion-fab>
+              <ion-fab>
+                <button ion-fab mini color="light" (click)="decrementCounter()" [disabled]="!inputVisible">
+                  <ion-icon
+                    [name]="decrementingCounter ? 'remove-circle' : 'remove-circle'"
+                    [color]="decrementingCounter ? 'secondary' : 'danger'"
+                    [ngClass]="{'ion-spin-animation': decrementingCounter}"
+                  ></ion-icon>
+                </button>
+              </ion-fab>
+              <ion-fab *ngIf="dataInfo.receptorOneEnabled === 1">
+                <button ion-fab mini color="light" (click)="openGateIn()">
+                  <ion-icon name="arrow-up" color="secondary"></ion-icon>
+                </button>
+              </ion-fab>
+              <ion-fab *ngIf="dataInfo.receptorTwoEnabled === 1">
+                <button ion-fab mini color="light" (click)="openGateOut()">
+                  <ion-icon name="arrow-down" color="primary"></ion-icon>
+                </button>
+              </ion-fab>
+            </div>
+          </ion-col>
+          <ion-col size="6" class="logo-bottom">
+            <img src="assets/imgs/logo3a.png" alt="Bottom Logo" style="max-width: 150px; height: auto;" />
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ion-toolbar>
   </ion-footer>

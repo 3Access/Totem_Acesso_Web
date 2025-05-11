@@ -1,193 +1,128 @@
 page-home {
-
-    .clearfix {
-        overflow: auto;        
+    .header-counter {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 2.5rem;
+      color: #fff;
+      text-align: right;
+      margin: 0;
     }
-
-    .title{
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        height: 100%;
-        font-family: 'Arial';
-        font-weight: bold;
-        font-size: 46pt;
+  
+    .title {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 2.8rem;
+      color: #333;
+      text-align: center;
+      margin: 0;
     }
-
-    .titleHistory {
-        color: white;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        font-family: 'Arial' ;
-        font-weight: bold;
-        font-size: 32pt;
-        margin-bottom: 20px;
+  
+    .title-history {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #fff;
+      text-align: center;
+      margin: 0.5rem 0;
     }
-
-    .header-conter {
-        display: flex !important;
-        justify-content: flex-end !important;        
-        height: 100%;
-        font-family: 'Arial';
-        font-weight: bold;
-        font-size: 36pt;
-    }
-
-    .box-message {
-        background-color: green;
-        width: 100%;
-        height: 200px;
-    }
-
-    .box-message-history {
-        background-color: transparent;
-        width: 100%;
-        height: 200px;
-    }
-    
-    .box-message-red {            
-        background-color: red;
-        width: 100%;
-        height: 200px;
-    }
-
-    .box-message-green {            
-        background-color: green;
-        width: 100%;
-        height: 100%;
-    }
-
-    .box-message-gray {        
-        background-color: rgb(220,220,220);
-        width: 100%;
-        height: 300px;        
-    }
-        
-    .box-header-gray {
-        background-color: gray;
-     }
-
-    .box-header-green {  
-        margin-top: 20px;      
-        background-color: darkgreen;        
-        width: 100%;
-        height: 80px;   
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;    
-    }
-
-    .box-header-red {          
-        margin-top: 20px;      
-        background-color: red;        
-        width: 100%;
-        height: 80px;   
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;    
-    }
-
-    .box-header-text {
-        color: black;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;        
-        font-family: 'Arial';        
-        font-size: 20pt;
-    }
-
-    .box-header-ticket-status {
-        color: white;
-        
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        font-family: 'Arial';
-        font-weight: bold;
-        font-size: 20pt;
-    }
-
-    .ticket-type-history {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        color: black;
-        font-size: 40pt;
-    }
-
-    .ticket-type-font {
-        margin-top: 40px;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        color: white;
-        font-size: 40pt;
-    }
-
-    .ticket-type-msg {        
-        margin-top: 20px;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        color: white;
-        font-size: 30pt;
-    }
-
-    .ticket-type-submsg {        
-        margin-top: 20px;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        color: white;
-        font-size: 15pt;
-    }
-
-    .options {
-        width: 400px;
-        margin: 5px;
-        display: flex !important;
-        justify-content: left !important;
-        align-items: left !important;
-        color: white;
-    }
-
-    .logo-bottom {                
-        display: flex !important;
-        justify-content: flex-end !important;        
-        align-items: right !important;
-        color: white;
-    }
-
-    ion-spinner * {
-        width: 32px;
-        height: 32px;
-        stroke: #444;
-        fill: #222;
-        display: block;
-        position: fixed;
-        overflow: show;
-        margin: auto;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;        
+  
+    .header-message {
+      padding: 1rem;
+      border-radius: 8px;
+      &.header-gray {
+        background-color: #e0e0e0;
       }
-
-      .ion-spin-animation { -webkit-animation: spin 1s infinite linear; -moz-animation: spin 1s infinite linear; -o-animation: spin 1s infinite linear; animation: spin 1s infinite linear; }
-
-        @-moz-keyframes spin { 0% { -moz-transform: rotate(0deg); }
-            100% { -moz-transform: rotate(359deg); } }
-        @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(359deg); } }
-        @-o-keyframes spin { 0% { -o-transform: rotate(0deg); }
-            100% { -o-transform: rotate(359deg); } }
-        @-ms-keyframes spin { 0% { -ms-transform: rotate(0deg); }
-            100% { -ms-transform: rotate(359deg); } }
-        @keyframes spin { 0% { transform: rotate(0deg); }
-            100% { transform: rotate(359deg); } }
-        .ion-load-a.ion-spin-animation { -webkit-animation-timing-function: steps(8, start); -moz-animation-timing-function: steps(8, start); animation-timing-function: steps(8, start); }
-        
-    
-
-}
+      &.header-green {
+        background-color: #2e7d32;
+      }
+      &.header-red {
+        background-color: #d32f2f;
+      }
+    }
+  
+    .message-box {
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      &.message-green {
+        background-color: #4caf50;
+      }
+      &.message-red {
+        background-color: #f44336;
+      }
+    }
+  
+    .ticket-type-font {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: #fff;
+      margin: 0.5rem 0;
+    }
+  
+    .ticket-type-msg {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 1.8rem;
+      color: #fff;
+      margin: 0.5rem 0;
+    }
+  
+    .ticket-type-submsg {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 1.2rem;
+      color: #fff;
+      margin: 0.5rem 0;
+    }
+  
+    .search-item {
+      --background: #f5f5f5;
+      --border-radius: 8px;
+      margin: 1rem 0;
+      ion-label {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 500;
+        font-size: 1.2rem;
+        color: #333;
+      }
+      ion-input {
+        --padding-start: 1rem;
+        --padding-end: 1rem;
+        font-size: 1.2rem;
+      }
+    }
+  
+    .options {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      ion-fab-button {
+        --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+    }
+  
+    .logo-bottom {
+      text-align: right;
+    }
+  
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+  
+    .ion-spin-animation {
+      animation: spin 1s infinite linear;
+    }
+  
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(359deg);
+      }
+    }
+  } 
