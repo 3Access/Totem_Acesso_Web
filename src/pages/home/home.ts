@@ -1,331 +1,692 @@
-import { Component, ViewChild, OnDestroy } from '@angular/core';
-import { NavController, NavParams, Events, Searchbar } from 'ionic-angular';
-import { Subscription, Subject, interval } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Component, ViewChild } from '@angular/core';
+import { NavController, NavParams, Events } from 'ionic-angular';
+import { HttpdProvider } from '../../providers/httpd/httpd';
+import { DataInfoProvider } from '../../providers/data-info/data-info'
+import { ListaBrancaProvider } from '../../providers/lista-branca/lista-branca'
+import { UiUtilsProvider } from '../../providers/ui-utils/ui-utils'
+import { Observable } from 'rxjs/Observable';
+import { Searchbar } from 'ionic-angular';
 import moment from 'moment';
 import 'moment/locale/pt-br';
-
-import { HttpdProvider } from '../../providers/httpd/httpd';
-import { DatabaseProvider } from '../../providers/database/database';
-import { DataInfoProvider } from '../../providers/data-info/data-info';
-import { ListaBrancaProvider } from '../../providers/lista-branca/lista-branca';
-import { UiUtilsProvider } from '../../providers/ui-utils/ui-utils';
 import { GpiosProvider } from '../../providers/gpios/gpios';
 import { AudioUtilsProvider } from '../../providers/audio-utils/audio-utils';
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
+
 })
-export class HomePage implements OnDestroy {
-  @ViewChild('searchbar') searchbar: Searchbar;
+export class HomePage {
+  @ViewChild('searchbar') searchbar:Searchbar;
 
-  // State vars
-  private destroy$ = new Subject<void>();
-  private intervalSub: Subscription;
+  configs: Observable<any>;
+  areaInfo: Observable<any>;
+  ticket: Observable<any>;    
+  
+  decrementingCounter: Boolean = false
+  handleClearInterval: any
+  idTypeBackgrond: number = this.dataInfo.backgroundIdNone;
+  ticketRead: Boolean = false
 
-  idTypeBackground = this.dataInfo.backgroundIdNone;
-  ticketRead = false;
-  decrementing = false;
-  inputVisible = true;
-  isLoading = true;
-  updating = false;
-  updatedInfo = false;
+  titleTicketOne: string = "Ingresso"
+  multipleColor: string = "danger"
 
-  title: string = this.dataInfo.titleGeneral;
-  message1: string = this.dataInfo.isLoading;
-  message2: string = this.dataInfo.isLoading;
-  counter: string = this.dataInfo.isLoading;
-  statusTicket: string = this.dataInfo.ticketOk;
-
-  history: string = this.dataInfo.history;
-  historyText1: string = this.dataInfo.historyUntilDay;
-  historyText2: string = this.dataInfo.accessPoints;
-  historyText3: string = this.dataInfo.usedDay;
-
-  searchTicket = '';
-
-  // Identifiers
-  areaId = this.dataInfo.areaId;
-  pontoId = this.dataInfo.totemId;
+  title: string = this.dataInfo.titleGeneral
+  message1: string = this.dataInfo.isLoading
+  message2: string = this.dataInfo.isLoading  
+      
+  areaId: number = this.dataInfo.areaId
+  pontoId: number = this.dataInfo.totemId
   areaName: string;
+  updatedInfo: Boolean = false
+  updating: Boolean = false
+  inputVisible: Boolean = true  
+  isLoading: Boolean = true
 
+  counter: string = this.dataInfo.isLoading
+  statusTicket: string = this.dataInfo.ticketOk
+  statusTicketStart: string = ""   
+  statusTicketUsedOn: string = ""
+
+  history: string = this.dataInfo.history
+  historyText1: string = this.dataInfo.historyUntilDay
+  historyText2: string = this.dataInfo.accessPoints
+  historyText3: string = this.dataInfo.usedDay
+
+  searchTicket: string = '';    
+  searching: any = false;  
+  
   constructor(
     public dataInfo: DataInfoProvider,
     public navCtrl: NavController,
-    public uiUtils: UiUtilsProvider,
-    public db: DatabaseProvider,
-    public navParams: NavParams,
-    public gpios: GpiosProvider,
+    public uiUtils: UiUtilsProvider,     
+    public navParams: NavParams,   
+    public gpios: GpiosProvider,  
     public events: Events,
-    public audio: AudioUtilsProvider,
-    public whiteList: ListaBrancaProvider,
-    public http: HttpdProvider
-  ) {
-    moment.locale('pt-BR');
-    this.audio.preload('success', 'assets/audio/success.mp3');
-    this.audio.preload('error', 'assets/audio/error.mp3');
+    public audioUtils: AudioUtilsProvider,
+    public listaBranca: ListaBrancaProvider,
+    public http: HttpdProvider) { 
+      
+      moment.locale('pt-BR');  
+      this.audioUtils.preload('success', 'assets/audio/success.mp3');    
+      this.audioUtils.preload('error', 'assets/audio/error.mp3');          
+  }  
+
+  ngOnDestroy() {    
+    //this.unsubscribeStuff()  
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.events.unsubscribe('totem:updated');
-    this.events.unsubscribe('socket:pageMultiple');
-    this.events.unsubscribe('socket:pageHistory');
-    this.events.unsubscribe('socket:decrementCounter');
-    this.events.unsubscribe('lista-branca-callback');
-    if (this.intervalSub) this.intervalSub.unsubscribe();
+  unsubscribeStuff(){
+    this.events.unsubscribe('totem:updated');		
+    this.events.unsubscribe('socket:pageMultiple');		
+    this.events.unsubscribe('socket:decrementCounter');		
+    this.events.unsubscribe('socket:pageHistory');		
+  }
+    
+  ionViewDidLoad() {           
+    this.reload()    
+   // this.dev()  
   }
 
-  ionViewDidLoad() {
-    this.reload();
+  dev(){
+
+    let self = this
+    setTimeout(() => {
+      self.searchTicket = '19520001'
+      self.searchOneTicket()
+    }, 1000)
   }
 
-  reload() {
-    this.resetState();
-    this.updatedInfo = !!this.navParams.get('updatedInfo');
-    if (this.updatedInfo) this.updateCounter();
-    this.subscribeEvents();
+  modeOperation(){    
+    console.log('ativaListaBranca', this.dataInfo.ativaListaBranca)
+    console.log('ativaRedeOnline', this.dataInfo.ativaRedeOnline)
+    console.log('ativaHotspot', this.dataInfo.ativaHotspot)
+    console.log('ativaSincronizacaoUsb', this.dataInfo.ativaSincronizacaoUsb)    
   }
 
-  private resetState() {
-    this.searchTicket = '';
-    this.history = '';
-    this.dataInfo.ticketRead = this.dataInfo.ticketReadDefault;
-    this.updating = false;
+  reload(){
+    this.searchTicket = ''
+    this.history = ''
+    this.dataInfo.ticketRead = this.dataInfo.ticketReadDefault
+    
+    this.updatedInfo = this.navParams.get('updatedInfo')
+    this.updating = false
+
+    if(this.updatedInfo == undefined)
+        this.updatedInfo = false
+      
+    if(this.updatedInfo)
+        this.updateInfo()
+            
+    this.subscribeStuff()  
   }
 
-  private subscribeEvents() {
-    this.events.subscribe('totem:updated', data => {
-      this.onConfigLoaded(data);
-      this.events.unsubscribe('totem:updated');
+  subscribeStuff(){
+    let self = this
+
+    this.events.subscribe('listaBrancaConfig', () => {      
+      this.subscribeListaBranca()
     });
-    this.events.subscribe('socket:pageMultiple', () => this.navCtrl.push('Multiple'));
-    this.events.subscribe('socket:pageHistory', () => this.showHistory());
-    this.events.subscribe('socket:decrementCounter', () => this.changeCounter(-1));
-    this.events.subscribe('listaBrancaConfig', () => {
-      this.events.subscribe('lista-branca-callback', data => this.onSearchCallback(data, data.success[0].result[0].id_estoque_utilizavel));
+       
+    this.events.subscribe('socket:pageMultiple', () => {
+      this.setMultiple()
+    });
+
+    this.events.subscribe('socket:pageHistory', () => {
+      this.goHistory()
+    });
+
+    this.events.subscribe('socket:decrementCounter', () => {
+      this.decrementCounter()
+    });
+
+    this.events.subscribe('totem:updated', (data) => {      
+      self.loadConfigCallback(data)
+      self.events.unsubscribe('totem:updated');	
     });
   }
 
-  private onConfigLoaded(data: any) {
-    if (!data.length) {
-      this.title = this.dataInfo.ipNotFound;
-      this.counter = '0';
-      return;
-    }
+  subscribeListaBranca(){
 
-    const cfg = data.success[0];
-    this.title = cfg.nome_area_acesso;
-    this.counter = cfg.lotacao_area_acesso;
-    this.areaId = cfg.fk_id_area_acesso;
-    this.pontoId = cfg.id_ponto_acesso;
-    this.areaName = this.title;
-    this.dataInfo.tipoPontoAcesso = cfg.tipo_ponto_acesso;
-    this.startAutoRefresh();
-    this.totemReady();
-    this.uiUtils.showToast(this.dataInfo.inicializedSuccessfully);
-    this.dataInfo.totemId = cfg.id_ponto_acesso;
+    this.events.subscribe('lista-branca-callback', data => {
+        this.listaBrancaAcessoCallback(data)            
+    });
   }
 
-  private startAutoRefresh() {
-    this.intervalSub = interval(10000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (!this.updating) this.updateCounter();
-        if (this.inputVisible) {
-          this.searchTicket = '';
-          this.setFocus();
+  listaBrancaAcessoCallback(data){    
+    this.seachOneTicketCallback(data, data.success[0].result[0].id_estoque_utilizavel)
+    this.totemWorking()
+  }  
+ 
+  startTimer(){
+    let self = this
+
+    setInterval(function(){ 
+
+      if(! self.updating)
+
+          self.updateInfo();                     
+
+          if(self.inputVisible){
+            self.searchTicket = ""
+            self.setFocus();
+          }            
+    
+    }, 10000);      
+  } 
+
+  setFocus(){
+    this.searchbar.setFocus();          
+  }
+
+  resetConfig(){
+    let self = this
+    self.idTypeBackgrond = self.dataInfo.backgroundIdNone
+    self.searchTicket = ''
+    self.searching = false    
+    self.ticketRead = false
+    self.title = self.areaName
+    self.history = self.dataInfo.historyGeneral
+    self.dataInfo.ticketRead = self.dataInfo.ticketReadDefault
+    self.totemWorking()  
+  }
+
+  backHome(){
+        
+    if(this.dataInfo.tipoPontoAcesso === 1)
+      this.backWithMessage()
+    else  
+      this.resetConfig()
+  }
+
+  backWithMessage(){
+    let self = this    
+    let time = this.dataInfo.timeMessage    
+
+    if(this.idTypeBackgrond === this.dataInfo.backgroundIdSearchNotOk || 
+        this.idTypeBackgrond === this.dataInfo.backgroundIdSearchOk){
+
+          time = this.dataInfo.timeMessageHistory
         }
-      });
+      
+    setTimeout(function(){ 
+      self.resetConfig()
+    }, time); 
   }
 
-  private updateCounter() {
-    this.updating = true;
-    this.http.getAreaCounter(this.areaId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(res => {
-        const lot = res[0]?.lotacao_area_acesso;
-        if (lot == null) this.uiUtils.showToast(this.dataInfo.configureYourSystem);
-        else this.counter = lot;
-        this.updating = false;
-      });
-  }
+  goHistory(){
+    
+    this.setFocus()
+    this.statusTicket = this.dataInfo.already
+    this.idTypeBackgrond = this.dataInfo.backgroundIdSearch    
+    this.ticketRead = false
+    let self = this    
 
-  decrementCounter() { this.changeCounter(-1, true); }
-  incrementCounter() { this.changeCounter(+1); }
+    clearInterval(this.handleClearInterval)
 
-  private changeCounter(delta: number, isDecrement: boolean = false) {
-    this.updating = true;
-    this.updatedInfo = false;
-    const obs = isDecrement ? this.http.decrementAreaCounter(this.areaId) : this.http.incrementAreaCounter(this.areaId);
-    obs.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.updating = false;
-      this.updatedInfo = true;
-      if (isDecrement) this.decrementing = false;
-    });
-    if (isDecrement) this.decrementing = true;
-  }
+    this.handleClearInterval = setTimeout(function(){ 
+      
+      self.idTypeBackgrond = self.dataInfo.backgroundIdNone
+      self.searchTicket = ''
+      self.searching = false    
+      self.setFocus()
 
-  setFilteredItems() {
-    if (this.searchTicket?.length === 7 && this.inputVisible) this.searchOneTicket();
-  }
-
-  private searchOneTicket() {
-    if (!this.searchTicket) return;
-    this.dataInfo.ativaRedeOnline ? this.searchOnline() : this.searchOffline();
-  }
-
-  private searchOffline() {
-    this.whiteList.searchOneTicket(this.searchTicket.substr(0, 8));
-  }
-
-  private searchOnline() {
-    const code = this.searchTicket.substr(0, 8);
-    this.totemBusy();
-    const call = this.dataInfo.totemSaida === 0 ? this.http.checkTicketExist(code) : this.http.checkTicketOut(code);
-    call.pipe(takeUntil(this.destroy$)).subscribe(data => this.handleSearchResponse(data, code));
-  }
-
-  private handleSearchResponse(data: any, ticket: string) {
-    this.totemReady();
-    if (data.success?.[0]?.callback === 100) {
-      // Valid ticket
-      this.dataInfo.ativaRedeOnline ? this.useTicketNetwork(ticket) : this.useTicketOffline(data, ticket);
-    } else {
-      this.processCallbackCode(data.success[0].callback, ticket, data.success[0].result);
-    }
-  }
-
-  private processCallbackCode(code: number, ticket: string, result: any) {
-    switch (code) {
-      case 1: return this.ticketNotExist(ticket);
-      case 2: return this.ticketNotSold(ticket);
-      case 3:
-      case 4: return this.ticketAccessDenied(ticket, result);
-      case 5: return this.ticketExpiredSameDay(ticket, result);
-      case 6: return this.ticketExpiredByTime(result);
-      case 8: return this.ticketDoorTimeExceeded(result);
-      case 9: return this.ticketExpiredSameDay(result);
-      case 10: return this.ticketAlreadyUsed(result);
-      case 11: return this.ticketMaxCountExceeded(result);
-      case 12: return this.ticketDoorTimeExceeded(result, true);
-      default: return this.showError(this.dataInfo.accessDenied, this.dataInfo.unknownError, ticket);
-    }
-  }
-
-  private ticketNotExist(t: string) { this.showError(this.dataInfo.accessDenied, this.dataInfo.ticketNotRegisteredMsg, t); }
-  private ticketNotSold(t: string) { this.showError(this.dataInfo.accessDenied, this.dataInfo.ticketNotSoldedMsg, t); }
-  private ticketAccessDenied(ticket: string, points: any[]) {
-    let msg = this.dataInfo.ticketNotAllowed;
-    if (this.idTypeBackground >= this.dataInfo.backgroundIdSearch) {
-      const list = points.map(p => ` - ${p.nome_ponto_acesso}`).join('');
-      msg += this.dataInfo.titleTicketAllowedAccessPoints + list;
-    }
-    this.showError(this.dataInfo.accessDenied, msg, ticket);
-  }
-  private ticketExpiredSameDay(ticket: string, data: any[]) {
-    const d = data[0].data_log_venda;
-    this.history = this.dataInfo.ticketRead + ticket;
-    const start = moment(d).format('LL');
-    this.showError(this.dataInfo.accessDenied, this.dataInfo.ticketExpired + start, ticket);
-  }
-  private ticketExpiredByTime(data: any[]) {
-    const d = data[0];
-    const until = moment(d.data_log_venda).add(d.tempo_validade, 'hours').format('LL');
-    this.showError(this.dataInfo.accessDenied, this.dataInfo.titleTicketInvalid + until, d.id_estoque_utilizavel);
-  }
-  private ticketDoorTimeExceeded(data: any[], used: boolean = false) {
-    const d = data[0];
-    const stamp = used ? moment(d.data_log_utilizacao).format('LLL') : moment(d.data_log_venda).add(d.horas_porta_acesso, 'hours').format('LLL');
-    this.showError(this.dataInfo.accessDenied, (used ? 'Tempo máximo de uso excedido: ' : this.dataInfo.titleTicketInvalid) + stamp, d.id_estoque_utilizavel);
-  }
-  private ticketAlreadyUsed(data: any[]) {
-    const d = data[0];
-    const stamp = moment(d.data_log_utilizacao).format('LL');
-    this.showError(this.dataInfo.accessDenied, this.dataInfo.ticketAlreadyUsed + ` - ${d.nome_ponto_acesso} - ${stamp}`, d.id_estoque_utilizavel);
-  }
-  private ticketMaxCountExceeded(data: any[]) { this.ticketAlreadyUsed(data); }
-
-  private useTicketOffline(res: any, ticket: string) {
-    this.showSuccess(ticket, res.success[0].result[0]);
-  }
-
-  private useTicketNetwork(ticket: string) {
-    this.http.useTicket(ticket)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(res => this.showSuccess(ticket, res.success[0]));
-  }
-
-  private showSuccess(ticket: string, info: any) {
-    const type = this.dataInfo.ativaRedeOnline ? info.nome_produto_peq : info.nome_produto_peq;
-    const subtype = this.dataInfo.ativaRedeOnline ? info.nome_subtipo_produto : info.nome_subtipo_produto;
-    this.ticketRead = true;
-    this.dataInfo.ticketRead = this.dataInfo.ticketReadDefault;
-    this.history = this.dataInfo.ticketRead + ticket;
-    this.statusTicket = this.dataInfo.ticketOk;
-    this.idTypeBackground = this.dataInfo.backgroundIdGreen;
-    this.message1 = this.dataInfo.welcomeMsg;
-    this.message2 = `${type} - ${subtype}`;
-    this.changeCounter(+1);
-    this.showGpioSuccess();
-    setTimeout(() => this.backHome(), this.dataInfo.timeMessage);
-  }
-
-  private showError(title: string, msg: string, ticket: string) {
-    this.isLoading = false;
-    this.ticketRead = true;
-    this.dataInfo.ticketRead = this.dataInfo.ticketReadDefault;
-    this.history = this.dataInfo.ticketRead + ticket;
-    this.idTypeBackground = this.idTypeBackground === this.dataInfo.backgroundIdSearch
-      ? this.dataInfo.backgroundIdSearchNotOk
-      : this.dataInfo.backgroundIdRed;
-    this.message1 = title;
-    this.message2 = msg;
-    this.showGpioError();
-    setTimeout(() => this.backHome(), this.dataInfo.timeMessage);
-  }
-
-  private totemBusy() { this.inputVisible = false; this.isLoading = true; this.updating = true; }
-  private totemReady() { this.inputVisible = true; this.isLoading = false; this.updating = false; this.setFocus(); }
-  private showGpioError() { this.audio.play('error'); this.http.activeGpioError().subscribe(); }
-  private showGpioSuccess() { this.audio.play('success'); this.http.activeGpioSuccess().subscribe(); }
-
-  private showHistory() {
-    this.setFocus();
-    this.idTypeBackground = this.dataInfo.backgroundIdSearch;
-    this.statusTicket = this.dataInfo.already;
-    this.ticketRead = false;
-    clearInterval(this.handleClearInterval);
-    this.handleClearInterval = setTimeout(() => {
-      this.idTypeBackground = this.dataInfo.backgroundIdNone;
-      this.searchTicket = '';
-      this.setFocus();
     }, 6000);
+
   }
 
-  private backHome() {
-    this.dataInfo.tipoPontoAcesso === 1 ? this.backWithDelay() : this.resetState();
+  showHistory(){
+
+    if(this.idTypeBackgrond !== this.dataInfo.backgroundIdSearch){
+        this.goHistory()
+
+    } else {
+      this.idTypeBackgrond = this.dataInfo.backgroundIdNone
+    }   
   }
 
-  private backWithDelay() {
-    const delay = [this.dataInfo.backgroundIdSearchNotOk, this.dataInfo.backgroundIdSearchOk]
-      .includes(this.idTypeBackground) ? this.dataInfo.timeMessageHistory : this.dataInfo.timeMessage;
-    setTimeout(() => this.resetState(), delay);
+  decrementCounter(){
+    this.updating = true
+    this.updatedInfo = false
+    this.decrementingCounter = true
+
+    this.http.decrementAreaCounter(this.dataInfo.areaId)
+    .subscribe( () => {      
+
+      this.updating = false
+      this.updatedInfo = true
+      this.decrementingCounter = false
+    })      
   }
 
-  private setFocus() { setTimeout(() => this.searchbar.setFocus(), 100); }
+  incrementCounter(){
+    this.updating = true
+    this.updatedInfo = false
 
-  openGateIn() {
+    this.http.incrementAreaCounter(this.areaId)
+    .subscribe( () => {      
+
+      this.updating = false
+      this.updatedInfo = true
+    })      
+  }    
+
+  loadConfigCallback(data){
+
+    console.log('Callback da configuração', data)
+
+    if(data.length == 0){
+      this.title = this.dataInfo.ipNotFound
+      this.counter = "0"
+    }
+
+    else {      
+      let self = this
+      let element = data.success[0]
+    
+      self.title = element.nome_area_acesso
+      self.counter = element.lotacao_area_acesso       
+      self.areaId = element.fk_id_area_acesso    
+      self.pontoId = element.fk_id_ponto_acesso
+      self.areaName = self.title
+      self.dataInfo.tipoPontoAcesso = element.tipo_ponto_acesso        
+      self.startTimer()
+      self.idTypeBackgrond = self.dataInfo.backgroundIdNone
+      self.totemWorking()
+      self.uiUtils.showToast(this.dataInfo.inicializedSuccessfully)
+      self.dataInfo.totemId = element.id_ponto_acesso
+    }    
+  }
+  
+  updateInfo(){
+
+    this.updating = true
+    this.updatedInfo = false
+
+    let self = this
+         
+    return this.http.getAreaCounter(this.areaId).subscribe(data => {
+
+      Object.keys(data).map(function(personNamedIndex){
+        let person = data[personNamedIndex];     
+
+        if(person[0].lotacao_area_acesso == undefined){
+          self.uiUtils.showToast(this.dataInfo.configureYourSystem)
+
+        } else {
+          self.counter = person[0].lotacao_area_acesso
+        }        
+      }); 
+      
+      self.updating = false
+    })
+  }
+
+  setFilteredItems(){            
+    if(this.searchTicket.length == 7 && this.inputVisible)
+      this.searchOneTicket() 
+  } 
+
+  totemWorking(){
+    this.inputVisible = true    
+    this.isLoading = false
+    this.updating = false        
+  }
+
+  totemNotWorking(){
+    this.inputVisible = false
+    this.isLoading = true
+    this.updating = true
+  }
+
+  showGpioError(){
+    this.audioUtils.play('error');
+
+    this.http.activeGpioError().subscribe(data => {
+      console.log("showGpioError")
+    })
+  }
+
+  showGpioSuccess(){
+
+    this.audioUtils.play('success');
+
+    this.http.activeGpioSuccess().subscribe(data => {
+      console.log("showGpioSuccess")
+    })
+  }
+
+  showError(str1, str2, ticket){  
+
+    this.isLoading = false
+    this.ticketRead = true            
+    
+    this.dataInfo.ticketRead = this.dataInfo.ticketReadDefault
+    this.history = this.dataInfo.ticketRead + ticket
+    
+    if(this.idTypeBackgrond === this.dataInfo.backgroundIdSearch){                      
+      this.idTypeBackgrond = this.dataInfo.backgroundIdSearchNotOk                   
+      this.historyText1 = this.dataInfo.ticketNotOk    
+      this.historyText2 = str2
+
+    } else {                  
+      this.idTypeBackgrond = this.dataInfo.backgroundIdRed      
+      this.message1 = str1
+      this.message2 = str2
+    }
+
+    console.log(str1, str2, ticket)
+
+    this.showGpioError()
+    
+    setTimeout(() => {
+      this.backHome()    
+    }, this.dataInfo.timeMessage)
+  }
+
+  searchOneTicket(){      
+
+
+    if(this.searchTicket !== ""){
+
+        if(this.dataInfo.ativaRedeOnline){
+          this.searchOneNetwork()
+        }
+        else {
+          this.searchOneListaBranca()
+        }
+    }                     
+  }  
+
+  searchOneListaBranca(){
+    let str = this.searchTicket.substring(0,8)
+    this.listaBranca.searchOneTicket(str)
+  }
+
+  searchOneNetwork(){
+    let str = this.searchTicket.substring(0,8)
+    this.totemNotWorking()      
+    
+    if(this.dataInfo.totemSaida === 0)
+      this.searchTicketIn(str)
+    else 
+      this.searchTicketOut(str)
+  }
+
+  searchTicketIn(str: string){
+
+    this.http.checkTicketExist(str).subscribe( data => {
+
+      this.seachOneTicketCallback(data, str)
+      this.totemWorking()
+    }) 
+  }
+
+
+  searchTicketOut(str: string){
+
+    this.http.checkTicketOut(str).subscribe( data => {      
+      this.searchTicketOutCallback(data)    
+    }) 
+  }
+
+  searchTicketOutCallback(data){        
+
+    this.statusTicket = this.dataInfo.ticketOk
+    this.idTypeBackgrond = this.dataInfo.backgroundIdGreen    
+    this.message1 = this.dataInfo.goodByeMsg              
+    this.message2 = ""
+    this.decrementCounter()
+    this.showGpioSuccess()
+    this.backHome()
+  }
+
+  seachOneTicketCallback(data, ticketTmp){            
+
+    console.log('Callback recebido: ', data.success[0].callback)
+    
+    if(data.success[0].callback == 1)
+      this.ticketNotExist(ticketTmp)
+
+    else if(data.success[0].callback == 2)
+      this.ticketNotSold(ticketTmp)
+
+    else if(data.success[0].callback == 3)
+      this.checkTicketAreaAccessDenied(ticketTmp, data.success[0].result)
+
+    else if(data.success[0].callback == 4)
+      this.checkTicketAreaAccessDenied(ticketTmp, data.success[0].result)
+
+    else if(data.success[0].callback == 5)
+      this.ticketValidityNotSame(ticketTmp, data)
+
+    else if(data.success[0].callback == 6)
+      this.ticketValidityTimeNotOk(data)
+
+    else if(data.success[0].callback == 8)
+      this.ticketAccessTimeDoorNotOk(data)
+
+    else if(data.success[0].callback == 9)
+      this.ticketAccessSameDayNotOk(data)
+
+    else if(data.success[0].callback == 10)
+      this.ticketAlreadUsedFinish(data)
+
+    else if(data.success[0].callback == 11)
+      this.ticketAccessCountPassNotOk(data)    
+
+    else if(data.success[0].callback == 12)
+      this.ticketAccessTimeDoorNotOkNotUsedContinue(data)
+
+    else if(data.success[0].callback == 100){
+
+      if(this.dataInfo.ativaRedeOnline)
+        this.useTicket(ticketTmp)
+
+      else
+        this.useTicketEnd(data, ticketTmp)
+    }
+      
+  }
+  
+  ticketNotExist(ticket){   
+    this.showError(this.dataInfo.accessDenied, this.dataInfo.ticketNotRegisteredMsg, ticket)    
+  }
+    
+  ticketNotSold(ticket){          
+    this.showError(this.dataInfo.accessDenied, this.dataInfo.ticketNotSoldedMsg, ticket)
+  }
+
+  checkTicketAreaAccessDenied(ticket, data){   
+    let pontos = ""        
+    let msg = this.dataInfo.ticketNotAllowed 
+
+    if(this.idTypeBackgrond >= this.dataInfo.backgroundIdSearch){
+
+      data.forEach(element => {
+        pontos += " - " + element.nome_ponto_acesso 
+      });
+
+      msg = this.dataInfo.ticketNotAllowed + this.dataInfo.titleTicketAllowedAccessPoints + pontos
+    }            
+
+    this.showError(this.dataInfo.accessDenied, msg, ticket)
+  }    
+ 
+  ticketValidityNotSame(ticketTmp, ticket){           
+    let data = ticket.success[0].result[0]    
+    let datalogvenda = data.data_log_venda
+
+    this.history = this.dataInfo.ticketRead + ticketTmp
+    this.statusTicketStart = moment(datalogvenda).format("LL")      
+    let message = this.dataInfo.ticketExpired + this.statusTicketStart
+
+    this.showError(this.dataInfo.accessDenied, message, ticketTmp)            
+  }
+
+  ticketValidityTimeNotOk(ticket){    
+    let data = ticket.success[0].result.result[0]
+    let id_estoque_utilizavel = data.id_estoque_utilizavel
+    let tempo_validade = data.tempo_validade    
+    
+    let message = this.dataInfo.titleTicketInvalid + moment(data.data_log_venda).hours(tempo_validade).format("LL");        
+    this.showError(this.dataInfo.accessDenied, message, id_estoque_utilizavel)        
+  }
+  
+  ticketAccessTimeDoorNotOk(ticket){      
+    let data = ticket.success[0].result[0]  
+    let id_estoque_utilizavel = data.id_estoque_utilizavel    
+    let message = this.dataInfo.titleTicketInvalid + moment(data.data_log_venda).add(data.horas_porta_acesso, 'hours').format("LLL");
+
+    this.showError(this.dataInfo.accessDenied, message, id_estoque_utilizavel)    
+  }
+
+  ticketAccessTimeDoorNotOkNotUsedContinue(ticket){      
+    let data = ticket.success[0].result[0]  
+    let id_estoque_utilizavel = data.id_estoque_utilizavel
+    let data_log_utilizacao = data.data_log_utilizacao
+    
+    let message = 'Tempo máximo de uso excedido: ' + moment(data_log_utilizacao).format("LLL");             
+        
+    this.showError(this.dataInfo.accessDenied, message, id_estoque_utilizavel)    
+  }
+
+  ticketAccessSameDayNotOk(ticket){       
+    let data = ticket.success[0].result[0]
+    let id_estoque_utilizavel = data.id_estoque_utilizavel
+
+    let message = this.dataInfo.titleTicketInvalid + moment(data.data_log_venda).format("LLL");
+    this.showError(this.dataInfo.accessDenied, message, id_estoque_utilizavel)    
+  }
+
+  ticketAccessCountPassNotOk(ticket){
+    this.ticketAlreadUsedFinish(ticket)
+  }
+
+  ticketAlreadUsedFinish(ticket){   
+    
+    let data = ticket.success[0].result[0]
+    let id_estoque_utilizavel = data.id_estoque_utilizavel
+    let nome_ponto_acesso = data.nome_ponto_acesso
+
+    this.statusTicketStart = moment(data.data_log_utilizacao).format("LL");      ;
+    let message = this.dataInfo.ticketAlreadyUsed + ' - ' + nome_ponto_acesso + '- ' + this.statusTicketStart
+    this.showError(this.dataInfo.accessDenied, message, id_estoque_utilizavel)    
+  }  
+
+  useTicket(ticket){        
+    
+    if(this.idTypeBackgrond === this.dataInfo.backgroundIdSearch){    
+      this.searchOkContinue(ticket)    
+
+    } else {                  
+
+      let self = this
+
+      console.log('Utilizando ticket', ticket)
+
+      this.http.useTicket(ticket).subscribe( data => {
+        self.useTicketEnd(data, ticket)              
+      })
+    }    
+  }
+
+  searchOkContinue(ticket){
+    console.log("Procurando mais informações sobre ingresso:", ticket)
+
+    this.http.checkTicketQuick(ticket).subscribe(data =>{
+        this.searchOkCallback(data)
+    })      
+  }
+
+  searchOkCallback(ticket){    
+    this.ticketRead = true
+    this.idTypeBackgrond = this.dataInfo.backgroundIdSearchOk                   
+    this.historyText1 = this.dataInfo.ticketOk
+    this.historyText2 = ""
+    this.historyText3 = ""
+    let pontos = "";
+
+    ticket.success.forEach(element => {
+
+      let validity = element.fk_id_validade
+
+      if(validity <= 2)
+        this.historyText2 = moment(element.data_log_venda).format("LL")    
+       
+      pontos += " - " + element.nome_ponto_acesso 
+
+    });
+
+    this.historyText3 = pontos        
+    this.backHome()   
+  }
+  
+  useTicketEnd(data, ticket){    
+    
+    let productType = ''
+    let productSubType = ''
+    this.ticketRead = true
+    this.dataInfo.ticketRead = this.dataInfo.ticketReadDefault  
+    this.history = this.dataInfo.ticketRead + ticket
+
+    data.success.forEach(element => {      
+
+      if(this.dataInfo.ativaRedeOnline){
+
+        productType = element.nome_produto_peq
+        productSubType = element.nome_subtipo_produto
+        
+      } else {
+
+        productType = element.result[0].nome_produto_peq
+        productSubType =  element.result[0].nome_subtipo_produto
+      }
+      
+    });
+    
+    let msg = productType + " - " + productSubType
+
+    this.statusTicket = this.dataInfo.ticketOk
+    this.idTypeBackgrond = this.dataInfo.backgroundIdGreen    
+    this.message1 = this.dataInfo.welcomeMsg              
+    this.message2 = msg
+    this.incrementCounter()
+    this.showGpioSuccess()
+
+    setTimeout(() => {
+      this.backHome()    
+    }, this.dataInfo.timeMessage)
+  }
+
+  setMultiple(){          
+    this.navCtrl.push('Multiple')      
+  }      
+
+  openGateIn(){
     this.http.systemCommand(1, 1, this.dataInfo.receptorOne)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.uiUtils.showAlert(this.dataInfo.sucess, this.dataInfo.titleCommandSuccess).present().then(() => this.http.goPDVi()));
+    .subscribe( () => {
+      
+      this.uiUtils.showAlert(this.dataInfo.sucess, this.dataInfo.titleCommandSuccess).present()
+      .then( () => {
+        this.goPDVi()
+      })
+    })
   }
 
-  openGateOut() {
+  openGateOut(){
     this.http.systemCommand(1, 1, this.dataInfo.receptorTwo)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.uiUtils.showAlert(this.dataInfo.sucess, this.dataInfo.titleCommandSuccess).present().then(() => this.http.goPDVi()));
+    .subscribe( () => {
+      
+      this.uiUtils.showAlert(this.dataInfo.sucess, this.dataInfo.titleCommandSuccess).present()
+      .then( () => {
+        this.goPDVi()
+      })
+    })
   }
+
+  goPDVi(){
+    this.http.goPDVi()
+  }
+
 }
