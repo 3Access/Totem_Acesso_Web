@@ -1,7 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { IonicPage, NavController, NavParams, Events} from 'ionic-angular';
 import { HttpdProvider } from '../../providers/httpd/httpd';
-import { DatabaseProvider } from '../../providers/database/database';
 import { DataInfoProvider } from '../../providers/data-info/data-info'
 import { UiUtilsProvider } from '../../providers/ui-utils/ui-utils'
 import moment from 'moment';
@@ -35,7 +34,6 @@ export class HistoryPage {
   constructor(public dataInfo: DataInfoProvider,
     public navCtrl: NavController,
     public uiUtils: UiUtilsProvider,     
-    public db: DatabaseProvider,
     public navParams: NavParams,  
     public events: Events,
     public http: HttpdProvider) {      

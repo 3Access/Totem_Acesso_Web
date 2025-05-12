@@ -13,7 +13,6 @@ import { IonicStorageModule } from '@ionic/storage';
 
 
 import { DataInfoProvider } from '../providers/data-info/data-info';
-import { DatabaseProvider } from '../providers/database/database';
 import { NativeStorage } from '@ionic-native/native-storage';
 import { UiUtilsProvider } from '../providers/ui-utils/ui-utils';
 import { HttpClientModule } from '@angular/common/http';
@@ -95,7 +94,6 @@ export const firebaseConfig = {
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     HttpdProvider,    
     DataInfoProvider,
-    DatabaseProvider,
     UiUtilsProvider,
     AngularFireModule,
     ConfigurationService,
