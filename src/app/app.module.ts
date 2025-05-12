@@ -17,8 +17,6 @@ import { NativeStorage } from '@ionic-native/native-storage';
 import { UiUtilsProvider } from '../providers/ui-utils/ui-utils';
 import { HttpClientModule } from '@angular/common/http';
 
-import { AngularFireModule } from 'angularfire2';
-import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { ConfigurationService } from "ionic-configuration-service";
 //import { SocketIoModule, SocketIoConfig } from 'ng-socket-io';Só colocar no estoque
 import { MultiplePage } from '../pages/multiple/multiple';
@@ -43,14 +41,6 @@ export function loadConfiguration(configurationService: ConfigurationService): (
 
 //const config: SocketIoConfig = { url: 'http://raspberrypi:8085', options: {} };
 
-export const firebaseConfig = {
-  apiKey: "AIzaSyDhZ2TQlXhn6x-E3qWBUQqd-GQ8D2uw69o",
-  authDomain: "totem-de-acesso.firebaseapp.com",
-  databaseURL: "https://totem-de-acesso.firebaseio.com",
-  projectId: "totem-de-acesso",
-  storageBucket: "totem-de-acesso.appspot.com",
-  messagingSenderId: "315325572094"
-};
 
 @NgModule({
   declarations: [
@@ -62,8 +52,6 @@ export const firebaseConfig = {
   imports: [
     BrowserModule,
     HttpClientModule,
-    AngularFireModule.initializeApp(firebaseConfig),
-    AngularFireDatabaseModule,
     IonicStorageModule.forRoot(),
     TooltipsModule.forRoot(),
     BrowserAnimationsModule,
@@ -95,7 +83,6 @@ export const firebaseConfig = {
     HttpdProvider,    
     DataInfoProvider,
     UiUtilsProvider,
-    AngularFireModule,
     ConfigurationService,
     {
       provide: APP_INITIALIZER,
