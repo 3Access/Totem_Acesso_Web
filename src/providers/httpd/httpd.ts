@@ -11,7 +11,7 @@ export class HttpdProvider {
   constructor(public http: HttpClient, public dataInfo: DataInfoProvider) {
     console.log('Hello HttpdProvider Provider');
 
-    this.address = this.dataInfo.addressServer
+    this.address = '/api'
     console.log("Endereço do servidor:", this.address)
     
     this.getTotemInfo().subscribe(data => {   
