@@ -1,60 +1,48 @@
 #!/usr/bin/env bash
+
+# Script de implantação do Totem Web
+# - Executa git pull
+# - Reconstrói a imagem Docker do cliente web
+# - Extrai a build estática e copia para /var/www/totem
+
 set -euo pipefail
 
-# -------------------------------------------------
-# deploy_totem.sh
-#   1) Reconstrói a imagem Docker do builder
-#   2) Extrai o /www gerado
-#   3) Copia para /var/www/totem, ajusta permissões
-#   4) Reload do Nginx
-# -------------------------------------------------
-
-# 1) Variables — ajuste se seus caminhos forem diferentes
-WEB_PROJECT_DIR="/root/3access/Totem_Acesso_Web"
+# Caminho do projeto Totem Web
+PROJECT_DIR="/root/3access/Totem_Acesso_Web"
+# Nome da imagem Docker builder
 IMAGE_NAME="totem-web-builder"
-CONTAINER_TMP="totem-web-build"
-NGINX_ROOT="/var/www/totem"
+# Nome do container temporário
+TEMP_CONTAINER="totem-web-build"
+# Diretório de destino no host onde o NGINX serve
+DEST_DIR="/var/www/totem"
 
-echo "🚀  Iniciando deploy do Totem Web..."
+echo "[1/5] Atualizando repositório git em $PROJECT_DIR"
+cd "$PROJECT_DIR"
+git pull origin master
 
-# 2) Build da imagem
-echo "📦  1) Reconstruindo imagem Docker: $IMAGE_NAME"
-cd "$WEB_PROJECT_DIR"
+echo "[2/5] Construindo imagem Docker $IMAGE_NAME"
 docker build -t "$IMAGE_NAME" .
 
-# 3) Cria container temporário para extrair /www
-echo "📂  2) Criando container temporário: $CONTAINER_TMP"
-docker create --name "$CONTAINER_TMP" "$IMAGE_NAME" /bin/true
-
-# 4) Limpa build anterior no host (se existir)
-echo "🧹  3) Limpando $WEB_PROJECT_DIR/www_old"
-rm -rf "$WEB_PROJECT_DIR"/www_old
-mv "$WEB_PROJECT_DIR"/www "$WEB_PROJECT_DIR"/www_old || true
-
-# 5) Copia a pasta /www do container para o host
-echo "📥  4) Extraindo /www do container para host"
-docker cp "$CONTAINER_TMP":/www "$WEB_PROJECT_DIR"/www
-
-# 6) Remove container temporário
-echo "🗑️   5) Removendo container temporário"
-docker rm "$CONTAINER_TMP"
-
-# 7) Garante que o diretório do Nginx exista e esteja limpo
-echo "📁  6) Preparando diretório Nginx: $NGINX_ROOT"
-mkdir -p "$NGINX_ROOT"
-rm -rf "$NGINX_ROOT"/*
-
-# 8) Copia novos arquivos para o Nginx e ajusta permissões
-echo "📋  7) Copiando build para $NGINX_ROOT e ajustando permissões"
-cp -r "$WEB_PROJECT_DIR"/www/* "$NGINX_ROOT"/
-chown -R www-data:www-data "$NGINX_ROOT"
-
-# 9) Reload do Nginx
-echo "🔄  8) Reloading Nginx"
-if command -v systemctl &>/dev/null; then
-  systemctl reload nginx
-else
-  service nginx reload
+# Se existir um container antigo, remove
+if docker ps -a --format '{{.Names}}' | grep -q "^$TEMP_CONTAINER$"; then
+  echo "[3/5] Removendo container temporário existente $TEMP_CONTAINER"
+  docker rm -f "$TEMP_CONTAINER"
 fi
 
-echo "✅  Deploy concluído com sucesso!"
+# Cria container temporário sem executar nada
+echo "[4/5] Criando container temporário $TEMP_CONTAINER"
+docker create --name "$TEMP_CONTAINER" "$IMAGE_NAME" /bin/true
+
+# Prepara diretório de destino
+echo "[5/5] Limpando $DEST_DIR e copiando novos arquivos"
+rm -rf "$DEST_DIR"/*
+mkdir -p "$DEST_DIR"
+docker cp "$TEMP_CONTAINER":/www/. "$DEST_DIR"
+
+# Ajusta permissões
+chown -R www-data:www-data "$DEST_DIR"
+
+# Remove container temporário
+docker rm "$TEMP_CONTAINER"
+
+echo "Deploy do Totem Web concluído com sucesso!"
