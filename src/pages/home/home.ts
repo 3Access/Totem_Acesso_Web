@@ -129,6 +129,7 @@ export class HomePage {
         this.updateInfo()
             
     this.subscribeStuff()  
+    this.dataInfo.ativaRedeOnline = true
   }
 
   subscribeStuff(){
@@ -203,6 +204,7 @@ export class HomePage {
     self.history = self.dataInfo.historyGeneral
     self.dataInfo.ticketRead = self.dataInfo.ticketReadDefault
     self.totemWorking()  
+    this.dataInfo.ativaRedeOnline = true
   }
 
   backHome(){
@@ -309,6 +311,7 @@ export class HomePage {
       self.totemWorking()
       self.uiUtils.showToast(this.dataInfo.inicializedSuccessfully)
       self.dataInfo.totemId = element.id_ponto_acesso
+      self.dataInfo.ativaRedeOnline = true
     }    
   }
   

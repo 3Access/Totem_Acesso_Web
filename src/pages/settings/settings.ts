@@ -20,7 +20,7 @@ export class SettingsPage {ticket
   memoryList: any
 
   ativaListaBranca: Boolean = false
-  ativaRedeOnline: Boolean = false
+  ativaRedeOnline: Boolean = true
   ativaHotspot: Boolean = false
   ativaSincronizacaoUsb: Boolean = false
 
