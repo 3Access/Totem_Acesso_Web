@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "535008040880",
+    "project_id": "totem-acesso",
+    "storage_bucket": "totem-acesso.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:535008040880:android:2adff7ee72c9a7191fe875",
+        "android_client_info": {
+          "package_name": "com.dbltecnologia.totem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzPK55e_4dvkplxgUqiL2kBQb00CkZ4fg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,6 +5,10 @@
     <author email="admin@dbltecnologia.com.br" href="https://www.dbltecnologia.com.br/">DBL Tecnologia</author>
     <content src="index.html" />
     <access origin="*" />
+    <access origin="https://totem.dbltecnologia.com.br/*" />
+    <allow-navigation href="https://totem.dbltecnologia.com.br/*" />
+    <access origin="https://storage.googleapis.com/*" />
+    <allow-navigation href="https://storage.googleapis.com/*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
