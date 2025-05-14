@@ -113,14 +113,3 @@ $white-opct-2: rgba(255,255,255,0.9);
 $label-ios-text-color: $blue;
 $label-md-text-color: $blue;
 
-
-/* src/app/app.scss */
-
-ion-fab {
-  position: static !important;
-  top: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  left: auto !important;
-  z-index: auto !important;
-}

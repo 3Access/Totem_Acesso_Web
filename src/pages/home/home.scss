@@ -109,6 +109,16 @@ page-home {
         transform: rotate(359deg);
       }
     }
+
+
+
+    :host ::ng-deep ion-fab {
+      position: static !important;
+      bottom: auto !important;
+      right: auto !important;
+      z-index: auto !important;
+    }
+    
   } 
   
   
