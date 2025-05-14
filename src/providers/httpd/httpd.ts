@@ -29,8 +29,8 @@ export class HttpdProvider {
 
 
 
-    //this.address = '/api'
-    this.address = 'http://localhost:8085'
+    this.address = '/api'
+    //this.address = 'http://localhost:8085'
 
 
     console.log("Endereço do servidor:", this.address)
