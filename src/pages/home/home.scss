@@ -76,23 +76,7 @@ page-home {
       margin: 0.5rem 0;
     }
   
-    .search-item {
-      --background: #f5f5f5;
-      --border-radius: 8px;
-      margin: 1rem 0;
-      ion-label {
-        font-family: 'Roboto', sans-serif;
-        font-weight: 500;
-        font-size: 1.2rem;
-        color: #333;
-      }
-      ion-input {
-        --padding-start: 1rem;
-        --padding-end: 1rem;
-        font-size: 1.2rem;
-      }
-    }
-  
+    
     .options {
       display: flex;
       gap: 0.5rem;
@@ -126,3 +110,12 @@ page-home {
       }
     }
   } 
+
+
+
+
+  .options ion-fab {
+    position: static !important;
+    margin-right: 0.5rem;
+  }
+  

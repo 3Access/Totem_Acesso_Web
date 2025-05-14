@@ -2,6 +2,21 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DataInfoProvider } from '../../providers/data-info/data-info'
 
+
+export interface TotemConfigElement {
+  id_ponto_acesso: number;
+  fk_id_ponto_acesso: number;
+  fk_id_area_acesso: number;
+  id_porta_acesso: number;
+  nome_ponto_acesso: string;
+  receptorOneEnabled: number;
+  receptorTwoEnabled: number;  
+  toolbarColor?: string;     
+  backgroundColor?: string;  
+  logoUrl?: string;          
+}
+
+
 @Injectable()
 export class HttpdProvider {
   
@@ -11,18 +26,27 @@ export class HttpdProvider {
   constructor(public http: HttpClient, public dataInfo: DataInfoProvider) {
     console.log('Hello HttpdProvider Provider');
 
-    this.address = '/api'
+
+
+
+    //this.address = '/api'
+    this.address = 'http://localhost:8085'
+
+
     console.log("Endereço do servidor:", this.address)
     
     this.getTotemInfo().subscribe(data => {   
-      this.dataInfo.configureTotem(data)
+      this.dataInfo.configureTotem(data as { success: any[] });
     })
   }  
   
   getTotemInfo(){
     let myData = JSON.stringify({id: this.dataInfo.totemId});
     const headers = new HttpHeaders({'Content-Type':'application/json'});
-    return this.http.post(this.address  + "/getTotemInfo", myData, {headers: headers})
+    const url = this.address  + "/getTotemInfo"
+    console.log("URL: ", url)
+
+    return this.http.post(url, myData, {headers: headers})
   }
 
   getAreas(){

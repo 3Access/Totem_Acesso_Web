@@ -5,11 +5,14 @@ import { DataInfoProvider } from '../../providers/data-info/data-info'
 import { ListaBrancaProvider } from '../../providers/lista-branca/lista-branca'
 import { UiUtilsProvider } from '../../providers/ui-utils/ui-utils'
 import { Observable } from 'rxjs/Observable';
-import { Searchbar } from 'ionic-angular';
+import { TextInput } from 'ionic-angular';
 import moment from 'moment';
 import 'moment/locale/pt-br';
 import { GpiosProvider } from '../../providers/gpios/gpios';
 import { AudioUtilsProvider } from '../../providers/audio-utils/audio-utils';
+
+
+
 
 @Component({
   selector: 'page-home',
@@ -17,7 +20,8 @@ import { AudioUtilsProvider } from '../../providers/audio-utils/audio-utils';
 
 })
 export class HomePage {
-  @ViewChild('searchbar') searchbar:Searchbar;
+  @ViewChild('searchbarInput') searchbarInput:TextInput;
+  
 
   configs: Observable<any>;
   areaInfo: Observable<any>;
@@ -87,6 +91,12 @@ export class HomePage {
     this.reload()    
    // this.dev()  
   }
+
+  ionViewDidEnter() {
+    // espera um tick para garantir que o componente já está renderizado
+    setTimeout(() => this.setFocus(), 0);
+  }
+      
 
   dev(){
 
@@ -175,8 +185,13 @@ export class HomePage {
     }, 10000);      
   } 
 
-  setFocus(){
-    this.searchbar.setFocus();          
+  setFocus(){    
+
+    if(this.searchbarInput){     
+      console.log(this.inputVisible) 
+      this.searchbarInput.setFocus();                
+    }
+      
   }
 
   resetConfig(){
@@ -271,17 +286,17 @@ export class HomePage {
     })      
   }    
 
-  loadConfigCallback(data){
+  loadConfigCallback(data){    
 
-    console.log('Callback da configuração', data)
+    if(!data){
 
-    if(data.length == 0){
       this.title = this.dataInfo.ipNotFound
       this.counter = "0"
     }
 
     else {      
       let self = this
+
       let element = data.success[0]
     
       self.title = element.nome_area_acesso
@@ -323,11 +338,12 @@ export class HomePage {
   }
 
   setFilteredItems(){            
-    if(this.searchTicket.length == 7 && this.inputVisible)
+    if(this.searchTicket.length == 8 && this.inputVisible)
       this.searchOneTicket() 
   } 
 
   totemWorking(){
+    console.log(' Totem funcionando')
     this.inputVisible = true    
     this.isLoading = false
     this.updating = false        

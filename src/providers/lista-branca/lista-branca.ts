@@ -175,12 +175,16 @@ export class ListaBrancaProvider {
     let utilizado = data.utilizado
     let unicaPortaUtilizado = unica_porta_acesso === 1 && utilizado === 1
     let horasPortaUtilizado = horas_porta_acesso >= 1 && utilizado === 1
+
+    console.log('Data ticket: ', data)
       
     if(unicaPortaUtilizado || horasPortaUtilizado){      
     
       console.log('Totem: '+ idTotem + ' - Ticket já foi utilizado e regra só permite 1 entrada: ' + data.id_estoque_utilizavel)
       
       let callback = [{"callback": 10, "result": [data]}]      
+
+
       this.buildCallback(callback)
     }
     else {
@@ -238,26 +242,36 @@ export class ListaBrancaProvider {
     this.checkDoorRules(ticket)
  }
 
-ticketValidityTime(ticket){
+ ticketValidityTime(ticket: any) {
+    const tempo = ticket.tempo_validade != null
+      ? ticket.tempo_validade
+      : 24;              // ← default 24 horas
+    const venda = ticket.data_log_venda;
 
-    let idTotem = this.dataInfo.totemId      
-    let id_estoque_utilizavel = ticket.id_estoque_utilizavel
-    let tempo_validade = ticket.tempo_validade
-    let until =  moment().hours(tempo_validade).format();
+    // cria um moment a partir da data de venda
+    const vendaMoment = moment(venda);
+    // adiciona as horas de validade (ou 24h, se undefined)
+    const expiraEm = vendaMoment.clone().add(tempo, 'hours');
+    const agora = moment();
 
-    let now = moment().format()        
-    let isAfter = moment(until).isAfter(now);
+    console.log(
+      `Totem: ${this.dataInfo.totemId} — expira em ${expiraEm.format()}, agora é ${agora.format()}`
+    );
 
-    console.log('Totem: '+ idTotem + ' - Verificando ticket validade tempo: ' + id_estoque_utilizavel + '. Agora é antes do tempo máximo? ' + isAfter)
-
-    if(isAfter)
-        this.checkDoorRules(ticket)    
-
-    else {
-        let callback = [{"callback": 6, "result": [ticket]}]
-        this.buildCallback(callback)
+    if (agora.isBefore(expiraEm)) {
+      console.log(
+        `Totem: ${this.dataInfo.totemId} - Verificando ticket validade: ${ticket.id_estoque_utilizavel}`
+      );
+      this.checkDoorRules(ticket);
+    } else {
+      console.log(
+        `Totem: ${this.dataInfo.totemId} - Ticket já foi utilizado e regra só permite 1 entrada: ${ticket.id_estoque_utilizavel}`
+      );
+      const callback = [{ callback: 6, result: [ticket] }];
+      this.buildCallback(callback);
     }
-}
+  }
+
 
 
   checkDoorRules(ticket){
@@ -293,6 +307,7 @@ ticketValidityTime(ticket){
   }
 
   ticketAccessTimeDoor(data){
+
 
     let idTotem = this.dataInfo.totemId      
     let until =  moment(data.data_log_venda).add(data.horas_porta_acesso, 'hours').format();
@@ -384,11 +399,11 @@ ticketValidityTime(ticket){
     this.buildCallback(callback)    
   }
 
-  incrementUseTicket(ticket){
+  incrementUseTicket(ticket): Promise<void> {
 
     console.log('Adicionando nova entrada de utilização do bilhete: ', ticket.id_estoque_utilizavel)
 
-    return new Promise<any>((resolve) => { 
+    return new Promise<void>((resolve) => { 
 
       this.allTickets.forEach(element => {        
 
@@ -402,7 +417,7 @@ ticketValidityTime(ticket){
             element.utilizacoes.push(moment().format())
 
             this.storage.set(String(ticket.id_estoque_utilizavel), element)
-            resolve()
+            resolve(void 0)
         }
       });               
     });    
@@ -416,7 +431,7 @@ ticketValidityTime(ticket){
 
       this.storage.remove(String(ticket.id_estoque_utilizavel))
       .then(data => {
-        resolve()
+        resolve(void 0)
       })
       
     });    

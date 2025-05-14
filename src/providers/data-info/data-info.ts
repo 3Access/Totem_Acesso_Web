@@ -2,6 +2,21 @@ import { Injectable } from '@angular/core';
 import { ConfigurationService } from "ionic-configuration-service";
 import { Events } from 'ionic-angular';
 
+export interface TotemConfigElement {
+  id_ponto_acesso: number;
+  fk_id_ponto_acesso: number;
+  fk_id_area_acesso: number;
+  id_porta_acesso: number;
+  nome_ponto_acesso: string;
+  receptorOneEnabled: number;
+  receptorTwoEnabled: number;  
+  toolbarColor?: string;     
+  backgroundColor?: string;  
+  logoUrl?: string;          
+}
+
+
+
 @Injectable()
 export class DataInfoProvider {
   
@@ -107,6 +122,18 @@ export class DataInfoProvider {
   ativaHotspot: any
   ativaSincronizacaoUsb: any
 
+  
+
+
+  // defaults gerais
+  public headerLogoUrl: string = 'assets/imgs/logo.png';
+  public footerLogoUrl: string = 'assets/imgs/logo3a.png';
+  public toolbarColor: string   = 'primary';
+  public spinnerColor: string   = 'secondary';
+  public backgroundColor: string= 'light';
+  public titleText: string      = 'Bem-vindo ao Totem!';
+
+
   constructor(private configurationService: ConfigurationService, public events: Events) {        
 
     this.addressServer =  this.configurationService.getValue<string>("addressServer");
@@ -128,26 +155,34 @@ export class DataInfoProvider {
     console.log('Receptor 2: ', this.receptorTwo)*/
   }  
 
-  configureTotem(data){    
+   configureTotem(resp: { success: any[] }) {
 
-    this.infoTotem = data
-    let self = this
+    console.log("Configurando totem", resp);
 
-      data.success.forEach(element => {
 
-        console.log('Informações do banco de dados sobre o ponto: ', element)
-        
-        self.titleGeneral = element.nome_ponto_acesso
-        self.totemId = element.fk_id_ponto_acesso
-        self.areaId = element.fk_id_area_acesso
-        self.portaId = element.id_porta_acesso        
-        self.totemSaida = element.saida
-      });          
+      let tmp = resp
+      this.ativaListaBranca = false
+    
+      resp.success.forEach(el => {
+        this.titleGeneral        = el.nome_ponto_acesso;
+        this.totemId             = el.fk_id_ponto_acesso;
+        this.areaId              = el.fk_id_area_acesso;
+        this.portaId             = el.id_porta_acesso;
+        this.receptorOneEnabled  = el.receptorOneEnabled;
+        this.receptorTwoEnabled  = el.receptorTwoEnabled;
 
-    this.events.publish('totem:updated', data);    
-      
-  }
+        // sobrescreve com valores vindos do banco, se existirem
+        if (el.header_logo_url)  this.headerLogoUrl   = el.header_logo_url;
+        if (el.footer_logo_url)  this.footerLogoUrl   = el.footer_logo_url;
+        if (el.toolbar_color)    this.toolbarColor    = el.toolbar_color;
+        if (el.spinner_color)    this.spinnerColor    = el.spinner_color;
+        if (el.background_color) this.backgroundColor = el.background_color;
+        if (el.title_text)       this.titleText       = el.title_text;
+      });
 
+      // dispara o evento para que quem estiver usando saiba
+      this.events.publish('totem:updated', tmp);
+    }
 
   
 
