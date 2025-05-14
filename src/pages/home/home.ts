@@ -188,7 +188,6 @@ export class HomePage {
   setFocus(){    
 
     if(this.searchbarInput){     
-      console.log(this.inputVisible) 
       this.searchbarInput.setFocus();                
     }
       
