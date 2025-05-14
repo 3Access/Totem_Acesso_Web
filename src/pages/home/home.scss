@@ -112,11 +112,36 @@ page-home {
 
 
 
-    :host ::ng-deep ion-fab {
-      position: static !important;
-      bottom: auto !important;
-      right: auto !important;
-      z-index: auto !important;
+    .options {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+    }
+    
+    .fab-like {
+      /* tamanho igual a um FAB padrão */
+      width: 56px !important;
+      height: 56px !important;
+      min-width: 56px !important;
+      padding: 0 !important;
+    
+      /* fundo branco (ou ajuste para 'light') e sombra */
+      --background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    
+      /* borda redonda */
+      border-radius: 50% !important;
+    
+      /* centraliza o ícone */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    
+      ion-icon {
+        /* tamanho de ícone de FAB */
+        font-size: 24px !important;
+      }
     }
     
   } 

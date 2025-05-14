@@ -126,59 +126,50 @@
       <ion-row class="ion-align-items-center">
         <ion-col size="6">
           <div class="options">
-            <ion-fab>
-              <button
-                ion-fab
-                mini
-                color="light"
-                (click)="showHistory()"
-                [disabled]="!inputVisible"
-              >
-                <ion-icon name="search" color="dark"></ion-icon>
-              </button>
-            </ion-fab>
-            <ion-fab>
-              <button
-                ion-fab
-                mini
-                color="light"
-                (click)="setMultiple()"
-                [disabled]="!inputVisible"
-              >
-                <ion-icon name="flash" [color]="multipleColor"></ion-icon>
-              </button>
-            </ion-fab>
-            <ion-fab>
-              <button
-                ion-fab
-                mini
-                color="light"
-                (click)="decrementCounter()"
-                [disabled]="!inputVisible"
-              >
-                <ion-icon
-                  [name]="
-                    decrementingCounter
-                      ? 'remove-circle'
-                      : 'remove-circle'
-                  "
-                  [color]="
-                    decrementingCounter ? 'secondary' : 'danger'
-                  "
-                  [ngClass]="{ 'ion-spin-animation': decrementingCounter }"
-                ></ion-icon>
-              </button>
-            </ion-fab>
-            <ion-fab *ngIf="dataInfo.receptorOneEnabled === 1">
-              <button ion-fab mini color="light" (click)="openGateIn()">
-                <ion-icon name="arrow-up" color="secondary"></ion-icon>
-              </button>
-            </ion-fab>
-            <ion-fab *ngIf="dataInfo.receptorTwoEnabled === 1">
-              <button ion-fab mini color="light" (click)="openGateOut()">
-                <ion-icon name="arrow-down" color="primary"></ion-icon>
-              </button>
-            </ion-fab>
+            <button
+              ion-button
+              class="fab-like"
+              (click)="showHistory()"
+              [disabled]="!inputVisible"
+            >
+              <ion-icon name="search"></ion-icon>
+            </button>
+
+            <button
+              ion-button
+              class="fab-like"
+              (click)="setMultiple()"
+              [disabled]="!inputVisible"
+            >
+              <ion-icon name="flash"></ion-icon>
+            </button>
+
+            <button
+              ion-button
+              class="fab-like"
+              (click)="decrementCounter()"
+              [disabled]="!inputVisible"
+            >
+              <ion-icon name="remove-circle"></ion-icon>
+            </button>
+
+            <button
+              *ngIf="dataInfo.receptorOneEnabled === 1"
+              ion-button
+              class="fab-like"
+              (click)="openGateIn()"
+            >
+              <ion-icon name="arrow-up"></ion-icon>
+            </button>
+
+            <button
+              *ngIf="dataInfo.receptorTwoEnabled === 1"
+              ion-button
+              class="fab-like"
+              (click)="openGateOut()"
+            >
+              <ion-icon name="arrow-down"></ion-icon>
+            </button>
           </div>
         </ion-col>
         <ion-col size="6" class="logo-bottom">
