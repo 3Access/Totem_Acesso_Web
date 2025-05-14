@@ -16,3 +16,8 @@
 // automatically applied to the <body> element in the app.
 
 
+ion-fab {
+    position: static !important;
+    z-index: auto !important;
+  }
+  
