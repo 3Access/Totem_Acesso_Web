@@ -49,6 +49,8 @@ export function loadConfiguration(configurationService: ConfigurationService): (
     SideMenuContentComponent
   ],
   
+
+  
   imports: [
     BrowserModule,
     HttpClientModule,

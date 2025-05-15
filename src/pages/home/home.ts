@@ -710,6 +710,8 @@ export class HomePage {
     this.http.goPDVi()
   }
 
+
+  
   public scanTicket() {
     this.barcodeScanner.scan({
       preferFrontCamera: false,
