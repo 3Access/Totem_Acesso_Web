@@ -29,8 +29,9 @@ export class HttpdProvider {
 
 
 
-    this.address = '/api'
+    //this.address = '/api'
     //this.address = 'http://localhost:8085'
+    this.address = 'https://totem.dbltecnologia.com.br/api'
 
 
     console.log("Endereço do servidor:", this.address)

@@ -4,7 +4,7 @@
       <ion-row class="ion-align-items-center">
         <ion-col size="6">
           <img
-            [src]="dataInfo.headerLogoUrl"
+            src="assets/imgs/logo.png"
             alt="Logo"
             style="max-width: 200px; height: auto;"
           />
@@ -32,13 +32,10 @@
       (keyup.enter)="setFilteredItems()"
       placeholder="Digite o número do ticket"
       clearInput
-    ></ion-input>
-  </ion-item>
+    ></ion-input>              
+  </ion-item>  
 
-  
-
-  <ion-list>
-    
+  <ion-list>    
 
     <ion-grid>
       <ion-row>
@@ -120,12 +117,24 @@
   </ion-list>
 </ion-content>
 
+
+
 <ion-footer>
   <ion-toolbar [color]="dataInfo.toolbarColor">
     <ion-grid>
       <ion-row class="ion-align-items-center">
         <ion-col size="6">
           <div class="options">
+
+            <button
+              class="fab-like"
+              ion-button              
+              (click)="scanTicket()"
+              
+            >
+              <ion-icon name="qr-scanner"></ion-icon>
+            </button>
+
             <button
               ion-button
               class="fab-like"
@@ -174,7 +183,7 @@
         </ion-col>
         <ion-col size="6" class="logo-bottom">
           <img
-            [src]="dataInfo.footerLogoUrl"
+           src="assets/imgs/logo3a.png"
             alt="Bottom Logo"
             style="max-width: 150px; height: auto;"
           />

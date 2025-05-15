@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <!-- permite cleartext para o seu domínio -->
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="true">totem.dbltecnologia.com.br</domain>
+  </domain-config>
+  <!-- opcional: para qualquer dominio HTTP -->
+  <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

@@ -49,6 +49,8 @@ export function loadConfiguration(configurationService: ConfigurationService): (
     SideMenuContentComponent
   ],
   
+
+  
   imports: [
     BrowserModule,
     HttpClientModule,
@@ -78,6 +80,7 @@ export function loadConfiguration(configurationService: ConfigurationService): (
   providers: [        
     NativeStorage,
     NativeAudio,
+    BarcodeScanner,
     File,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     HttpdProvider,    
