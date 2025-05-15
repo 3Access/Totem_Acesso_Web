@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, NgZone } from '@angular/core';
 import { NavController, NavParams, Events } from 'ionic-angular';
 import { HttpdProvider } from '../../providers/httpd/httpd';
 import { DataInfoProvider } from '../../providers/data-info/data-info'
@@ -10,8 +10,8 @@ import moment from 'moment';
 import 'moment/locale/pt-br';
 import { GpiosProvider } from '../../providers/gpios/gpios';
 import { AudioUtilsProvider } from '../../providers/audio-utils/audio-utils';
-
-
+import { BarcodeScanner, BarcodeScanResult } from '@ionic-native/barcode-scanner';
+import { Platform } from 'ionic-angular';
 
 
 @Component({
@@ -69,6 +69,9 @@ export class HomePage {
     public events: Events,
     public audioUtils: AudioUtilsProvider,
     public listaBranca: ListaBrancaProvider,
+    public barcodeScanner: BarcodeScanner,
+    private zone: NgZone,
+    private platform: Platform,
     public http: HttpdProvider) { 
       
       moment.locale('pt-BR');  
@@ -705,6 +708,38 @@ export class HomePage {
 
   goPDVi(){
     this.http.goPDVi()
+  }
+
+  public scanTicket() {
+    this.barcodeScanner.scan({
+      preferFrontCamera: false,
+      showFlipCameraButton: true,
+      showTorchButton: true,
+      prompt: 'Aponte o QR Code do ingresso',
+      formats: 'QR_CODE',
+      torchOn: false,
+      
+      // fecha na hora
+      resultDisplayDuration: 0,
+      disableSuccessBeep: true
+    })
+    .then((barcodeData: BarcodeScanResult) => {
+
+      
+      console.log('BarcodeData JSON:', JSON.stringify(barcodeData));
+
+      if (!barcodeData.cancelled) {
+        // fecha o scanner (opcional, mas garante)
+        // roda dentro da zona para o Angular perceber a mudança
+        this.zone.run(() => {
+          this.searchTicket = barcodeData.text.trim();
+          this.setFilteredItems();
+        });
+      }
+    })
+    .catch(err => {
+      console.error('Erro no scan', err);
+    });
   }
 
 }

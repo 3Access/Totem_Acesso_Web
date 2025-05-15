@@ -32,7 +32,7 @@
       (keyup.enter)="setFilteredItems()"
       placeholder="Digite o número do ticket"
       clearInput
-    ></ion-input>
+    ></ion-input>              
   </ion-item>  
 
   <ion-list>    
@@ -123,6 +123,16 @@
       <ion-row class="ion-align-items-center">
         <ion-col size="6">
           <div class="options">
+
+            <button
+              class="fab-like"
+              ion-button              
+              (click)="scanTicket()"
+              
+            >
+              <ion-icon name="qr-scanner"></ion-icon>
+            </button>
+
             <button
               ion-button
               class="fab-like"

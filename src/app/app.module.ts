@@ -78,6 +78,7 @@ export function loadConfiguration(configurationService: ConfigurationService): (
   providers: [        
     NativeStorage,
     NativeAudio,
+    BarcodeScanner,
     File,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     HttpdProvider,    
