@@ -23,6 +23,7 @@ docker build -t totem-web-builder .
 1. Cria um container temporário (que não faz nada) a partir da imagem builder:
 
    ```bash
+   docker create --name totem-web-build totem-web-builder /bin/true
    ```
 
 docker create --name totem-web-build totem-web-builder /bin/true
