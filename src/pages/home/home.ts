@@ -185,6 +185,8 @@ export class HomePage {
   } 
 
   setFocus(){    
+
+    
     
     this.inputVisible = true
     this.searching = false
