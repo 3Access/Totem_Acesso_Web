@@ -1,5 +1,6 @@
-import { Component, ViewChild, NgZone } from '@angular/core';
+import { Component, ViewChild, NgZone, ElementRef } from '@angular/core';
 import { NavController, NavParams, Events } from 'ionic-angular';
+
 import { HttpdProvider } from '../../providers/httpd/httpd';
 import { DataInfoProvider } from '../../providers/data-info/data-info'
 import { ListaBrancaProvider } from '../../providers/lista-branca/lista-branca'
@@ -20,7 +21,7 @@ import { Platform } from 'ionic-angular';
 
 })
 export class HomePage {
-  @ViewChild('searchbarInput') searchbarInput:TextInput;
+  @ViewChild('searchbarInput', { read: ElementRef }) inputEl: ElementRef;
   
 
   configs: Observable<any>;
@@ -97,7 +98,7 @@ export class HomePage {
 
   ionViewDidEnter() {
     // espera um tick para garantir que o componente já está renderizado
-    setTimeout(() => this.setFocus(), 0);
+    setTimeout(() => this.setFocus(), 3000);
   }
       
 
@@ -108,13 +109,6 @@ export class HomePage {
       self.searchTicket = '19520001'
       self.searchOneTicket()
     }, 1000)
-  }
-
-  modeOperation(){    
-    console.log('ativaListaBranca', this.dataInfo.ativaListaBranca)
-    console.log('ativaRedeOnline', this.dataInfo.ativaRedeOnline)
-    console.log('ativaHotspot', this.dataInfo.ativaHotspot)
-    console.log('ativaSincronizacaoUsb', this.dataInfo.ativaSincronizacaoUsb)    
   }
 
   reload(){
@@ -132,7 +126,6 @@ export class HomePage {
         this.updateInfo()
             
     this.subscribeStuff()  
-    this.dataInfo.ativaRedeOnline = true
   }
 
   subscribeStuff(){
@@ -154,7 +147,9 @@ export class HomePage {
       this.decrementCounter()
     });
 
-    this.events.subscribe('totem:updated', (data) => {      
+    this.events.subscribe('totem:updated', (data) => {    
+      
+      
       self.loadConfigCallback(data)
       self.events.unsubscribe('totem:updated');	
     });
@@ -190,9 +185,12 @@ export class HomePage {
   } 
 
   setFocus(){    
+    
+    this.inputVisible = true
+    this.searching = false
 
-    if(this.searchbarInput){     
-      this.searchbarInput.setFocus();                
+    if(this.inputEl.nativeElement.querySelector('input')){     
+      this.inputEl.nativeElement.querySelector('input').focus();     
     }
       
   }
@@ -207,7 +205,6 @@ export class HomePage {
     self.history = self.dataInfo.historyGeneral
     self.dataInfo.ticketRead = self.dataInfo.ticketReadDefault
     self.totemWorking()  
-    this.dataInfo.ativaRedeOnline = true
   }
 
   backHome(){
@@ -314,7 +311,6 @@ export class HomePage {
       self.totemWorking()
       self.uiUtils.showToast(this.dataInfo.inicializedSuccessfully)
       self.dataInfo.totemId = element.id_ponto_acesso
-      self.dataInfo.ativaRedeOnline = true
     }    
   }
   
@@ -406,7 +402,6 @@ export class HomePage {
   }
 
   searchOneTicket(){      
-
 
     if(this.searchTicket !== ""){
 

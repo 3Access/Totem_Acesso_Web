@@ -146,6 +146,9 @@ export class DataInfoProvider {
     this.receptorOne =  this.configurationService.getValue<string>("receptorOneId");
     this.receptorTwo =  this.configurationService.getValue<string>("receptorTwoId");
 
+    // Ativado para totem online - direto na internet
+    this.ativaRedeOnline = true
+
     /*console.log('Endereço do servidor: ', this.addressServer)
     console.log('Tempo da mensagem: ', this.timeMessage)
     console.log('Tempo da mensagem no histórico: ', this.timeMessageHistory)
