@@ -25,13 +25,10 @@ export class HttpdProvider {
         
   constructor(public http: HttpClient, public dataInfo: DataInfoProvider) {
     console.log('Hello HttpdProvider Provider');
-
-
-
-
-    //this.address = '/api'
+    
+    this.address = '/totem/api'
     //this.address = 'http://localhost:8085'
-    this.address = 'https://totem.dbltecnologia.com.br/api'
+    //this.address = 'https://totem.dbltecnologia.com.br/api'
 
 
     console.log("Endereço do servidor:", this.address)
