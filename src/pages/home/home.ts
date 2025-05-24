@@ -13,6 +13,7 @@ import { GpiosProvider } from '../../providers/gpios/gpios';
 import { AudioUtilsProvider } from '../../providers/audio-utils/audio-utils';
 import { BarcodeScanner, BarcodeScanResult } from '@ionic-native/barcode-scanner';
 import { Platform } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
 
 
 @Component({
@@ -72,7 +73,7 @@ export class HomePage {
     public listaBranca: ListaBrancaProvider,
     public barcodeScanner: BarcodeScanner,
     private zone: NgZone,
-    private platform: Platform,
+    public storage: Storage,
     public http: HttpdProvider) { 
       
       moment.locale('pt-BR');  
@@ -91,7 +92,8 @@ export class HomePage {
     this.events.unsubscribe('socket:pageHistory');		
   }
     
-  ionViewDidLoad() {           
+  ionViewDidLoad() {  
+    this.storage.set('ativaRedeOnline', true)         
     this.reload()    
    // this.dev()  
   }
